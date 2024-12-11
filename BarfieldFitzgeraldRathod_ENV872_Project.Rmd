@@ -1,0 +1,93 @@
+---
+title: "Analysis of Polar Bear Diets in the Chukchi & Beaufort Sea"
+
+author: "Andrew Barfield, Kendall Fitzgerald, Priya Rathod"
+
+output: html_document
+---
+\tableofcontents 
+\newpage
+\listoftables 
+\newpage
+\listoffigures 
+\newpage
+
+```{r setup, include=FALSE}
+# Set your working directory
+
+# Load your packages
+library(here)
+library(mapview)
+library(sf)
+library(tidyverse)
+library(lubridate)
+
+# Set your ggplot theme
+
+# Load your datasets
+PolarBearHair <- read.csv(
+  file=here(
+    "Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv"), stringsAsFactors = TRUE)
+
+#Clean data
+PolarBearHairCleaned <- PolarBearHair %>%
+  select(-"SummerHabitatDuringHairGrowth", -"TypicalSummerHabitat") %>%
+  mutate(Capture.Date=as.Date(Capture.Date, format = '%m/%d/%Y')) %>%
+  na.omit()
+```
+
+
+# Rationale and Research Questions
+
+
+
+
+# Dataset Information
+The dataset used in this analysis was obtained from the United States Geological Survey (USGS) website, more specifically from the Alaska Science Center (ACS). It catalogues the carbon and nitrogen isotope concentrations found in polar bear hair samples in the Chukchi and Beaufort Sea. The period for obtaining these samples are as follows: Chukchi Sea samples (Russia/Alaska) were collected from periods of 1987-1989 and 2008-2017 and Beaufort Sea samples (Alaska) were collected from periods of 1983-1989 and 2004-2016. The basic data structure of this dataset is outlined below:
+
+Column Name                   | Description
+:-----------------------------|:----------------------------------
+BearID                        | Unique numerical identifier for each bear   
+Sex                           | The sex of the bear determined at capture
+Age                           | The age of bear determined through teeth or best estimate
+Capture.Date                  | The date bear was captured and hair was collected   
+Year                          | The year bear was captured and sampled
+Pop                           | Subpopulation boundary where bear was captured
+TypicalSummerHabitat          | Whether bear summered on ice or land (only for Chukchi Sea bears)
+SummerHabitatDuringHairGrowth | Whether bear summered on ice or land based on sample
+Lat                           | Latitude of capture
+Long                          | Longitude of capture
+d15N.Air                      | Stable nitrogen (15N/14N) isotope ratios in δ notation, as parts per thousand (‰) deviation from the primary standard, atmospheric air
+d13C.VPDB                     | Stable carbon (13C/12C) isotope ratios in δ notation, as parts per thousand (‰) deviation from the primary standards Vienna Pee Dee Belemnite
+Percent.N                     | The percent of nitrogen by mass measured in the hair
+Percent.C                     | The percent carbon by mass measured in the hair
+
+# Data Wrangling
+Data was wrangled first by taking out two unnecessary columns: “TypicalSummerHabitat” and “SummerHabitatDuringHairGrowth”. These columns only had data for about half of the recorded hair samples and weren’t deemed necessary to undergo further data analysis. After they were taken out, all other samples with “NA” fields were taken out of the cleaned dataset.   
+
+# Exploratory Analysis 
+
+
+
+\newpage
+
+# Analysis
+
+
+
+## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
+
+## Question 2: 
+
+
+
+
+\newpage
+
+# Summary and Conclusions
+
+
+\newpage
+
+# References
+<add references here if relevant, otherwise delete this section> 
