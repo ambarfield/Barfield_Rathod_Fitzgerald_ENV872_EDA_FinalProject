@@ -5,6 +5,7 @@ author: "Andrew Barfield, Kendall Fitzgerald, Priya Rathod"
 
 output: html_document
 ---
+https://github.com/ambarfield/Barfield_Rathod_Fitzgerald_ENV872_EDA_FinalProject.git
 
 ![Image credit: Polar Bears International](Images/PolarBear.png)
 *Image credit: [Polar Bears International](https://polarbearsinternational.org/news-media/articles/sea-ice-importance-arctic-food-chain)*
@@ -17,6 +18,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 # Set your working directory
+setwd("~/FinalProject")
 
 # Load your packages
 library(here)
@@ -96,5 +98,7 @@ Data was wrangled first by taking out two unnecessary columns: “TypicalSummerH
 
 # References
 Pilfold, N. W., Hedman, D., Stirling, I., Derocher, A. E., Lunn, N. J., & Richardson, E. (2016). Mass Loss Rates of Fasting Polar Bears. Physiological and Biochemical Zoology: PBZ, 89(5), 377–388. https://doi.org/10.1086/687988
+
+Rode, K.D., 2021, Carbon and nitrogen isotope concentrations in polar bear hair and prey from the Alaska Beaufort and Chukchi Seas, 1978-2019: U.S. Geological Survey data release, https://doi.org/10.5066/P9KM5FT2
 
 Rode, K. D., Taras, B. D., Stricker, C. A., Atwood, T. C., Boucher, N. P., Durner, G. M., Derocher, A. E., Richardson, E. S., Cherry, S. G., Quakenbush, L., Horstmann, L., & Bromaghin, J. F. (2023). Diet energy density estimated from isotopes in predator hair associated with survival, habitat, and population dynamics. Ecological Applications, 33(2), e2751. https://doi.org/10.1002/eap.2751
