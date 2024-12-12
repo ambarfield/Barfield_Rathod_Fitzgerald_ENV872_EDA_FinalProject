@@ -24,7 +24,9 @@ The data in this repository is from Alaska Science Center, and was accessed via 
 ## Folder structure, file formats, and naming conventions
 The repository has the final .Rmd file that has all of the coding and information for the project, titled "BarfieldFitzgeraldRathod_ENV872_Project.Rmd" There is also a matching .html file of the same name that is the final output of the project. 
 
-It also has a Data folder that has a Raw and Processed folder inside of it. The Raw folder contains the original .csv file that all analysis has been made from and the Processed folder contains all processed codes in RScript of the various analysis that has been performed on the data. 
+It also has a Data folder that has a Raw and Processed folder inside of it. The Raw folder contains the original .csv file that all analysis has been made from and the Processed folder contains all processed codes in RScript of the various analysis that has been performed on the data.
+
+An Images folder contains the singular picture used in the beginning of the project, which was foudn via Polar Bears International. 
 
 ## Metadata
 
