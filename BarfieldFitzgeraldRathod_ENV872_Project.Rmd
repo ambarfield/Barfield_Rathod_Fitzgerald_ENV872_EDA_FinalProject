@@ -110,6 +110,23 @@ mapView(PolarBearSpatial, zcol = "Sex")
 
 # Analysis
 ```{r time series analysis}
+#reading in file
+PolarBear.Hair.Data <- read.csv("./Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv",
+stringsAsFactors = TRUE)
+
+#Setting date column
+PolarBear.Hair.Data$Capture.Date <- as.Date(PolarBear.Hair.Data$Capture.Date,
+                                                   format = "%m/%d/%Y")
+#Organizing data by date
+PolarBear.Hair.Data.Sorted <- PolarBear.Hair.Data[order(as.Date(PolarBear.Hair.Data$Capture.Date,
+                                     format = "%m-%d-%Y")),]
+
+#Checking to see if there are any NAs in nitrogen isotope concentrations
+any(is.na(PolarBear.Hair.Data.Sorted$d15N.Air))
+
+#Checking to see if there are any NAs in carbon isotope concentrations
+any(is.na(PolarBear.Hair.Data.Sorted$d13C.VPDB))
+
 #There is a big gap of data between 1990 and 2003, so we will first start by separating the data into early and late year chunks
 
 PolarBear.Early <- PolarBear.Hair.Data.Sorted %>%
