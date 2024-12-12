@@ -109,7 +109,7 @@ mapView(PolarBearSpatial, zcol = "Sex")
 \newpage
 
 # Analysis
-```{r time series analysis}
+```{r time series analysis, warning=FALSE, echo=FALSE}
 #reading in file
 PolarBear.Hair.Data <- read.csv("./Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv",
 stringsAsFactors = TRUE)
