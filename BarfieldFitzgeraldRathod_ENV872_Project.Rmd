@@ -43,7 +43,8 @@ PolarBearHairCleaned <- PolarBearHair %>%
 
 
 # Rationale and Research Questions
-This project intends to discover whether the diet of polar bears has changed over time in Alaska. Polar bears (Ursus maritimus) are apex predators in the Arctic ecosystem. Polar bears depend on sea ice for hunting, typically to use a platform to hunt seals. As global temperatures rise, melting sea ice has led to habitat loss for polar bears, forcing them onto land. Without access to ice, researchers have found that polar bears enter a state of fasting, increasing the time-period during which they must rely on their fat reserves (Pilfold et al., 2016). Within this context, it is critical to understand whether the diets of polar bears are evolving, if at all, in response to climate change. This will allow researchers to predict how Polar bear populations will change based on sea ice loss predictions and whether polar bears are adapting alternative feeding strategies (e.g.: terrestrial creatures) to improve survival.
+This project intends to discover whether the diet of polar bears has changed over time in Alaska. Polar bears (Ursus maritimus) are apex predators in the Arctic ecosystem. Polar bears depend on sea ice for hunting, typically to use a platform to hunt seals. As global temperatures rise, melting sea ice has led to habitat loss for polar bears, forcing them onto land. Without access to ice, researchers have found that polar bears enter a state of fasting, increasing the time-period during which they must rely on their fat reserves (Pilfold et al., 2016). Within this context, it is critical to understand whether the diets of polar bears are evolving, if at all, in response to climate change. This will allow researchers to predict how Polar bear populations will change based on sea ice loss predictions and whether polar bears are adapting alternative feeding strategies (e.g. terrestrial creatures) to improve survival.
+
 We chose a USGS dataset that includes carbon and nitrogen isotope concentrations measured in polar bear hair between 1983-2017 in the Beaufort and Chukchi Seas. Polar bears were located by helicopter and immobilized with a dart containing zolazepam-tiletamine, a common anaesthetic used in veterinary medicine. Hair was sampled by pulling 10-20 hairs from one of the upper forearms of polar bears. This dataset was chosen because elements found in hair (Nitrogen, Carbon) indicate the macronutrient composition of diets (protein vs. fat) (Rode et al., 2023).
 
 
@@ -73,6 +74,25 @@ Percent.C                     | The percent carbon by mass measured in the hair
 Data was wrangled first by taking out two unnecessary columns: “TypicalSummerHabitat” and “SummerHabitatDuringHairGrowth”. These columns only had data for about half of the recorded hair samples and weren’t deemed necessary to undergo further data analysis. After they were taken out, all other samples with “NA” fields were taken out of the cleaned dataset.   
 
 # Exploratory Analysis 
+```{r Sampled Polar Bear Distribution by Year, echo=FALSE, warning = FALSE}
+#converting data into spatial format
+PolarBearSpatial <- st_as_sf(PolarBearHairCleaned, 
+                             coords = c('Long', 'Lat'), crs=4269)
+PolarBearSpatial$Year <- as.factor(PolarBearSpatial$Year)
+
+
+mapView(PolarBearSpatial, zcol = "Year")
+
+
+```
+
+
+
+```{r Sampled Polar Bear Dsitribution by Sex, echo=FALSE, warning=FALSE}
+
+mapView(PolarBearSpatial, zcol = "Sex")
+
+```
 
 
 
