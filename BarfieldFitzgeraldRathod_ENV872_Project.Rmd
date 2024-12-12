@@ -5,6 +5,9 @@ author: "Andrew Barfield, Kendall Fitzgerald, Priya Rathod"
 
 output: html_document
 ---
+
+![Image credit: Polar Bears International](Images/PolarBear.png)
+*Image credit: [Polar Bears International](https://polarbearsinternational.org/news-media/articles/sea-ice-importance-arctic-food-chain)*
 \tableofcontents 
 \newpage
 \listoftables 
