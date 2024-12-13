@@ -1,0 +1,66 @@
+---
+title: "Final Project: Descriptive Statistics"
+author: "Priya Rathod"
+date: "Fall 2024"
+output: html_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+#Loading packages
+
+library(tidyverse) 
+library(lubridate)
+library(here)
+here()
+library(dplyr)
+library(knitr)
+
+
+#Importing our dataset on polar bears
+PolarBearHair <- read.csv(file = here("Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv"), stringsAsFactors = TRUE)
+
+```
+
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+#Descriptive Statistics - Sex
+
+sex <- summary(PolarBearHair$Sex)
+sex <-data.frame(Values = sex)
+colnames(sex) <- c("Count, #")
+
+sex_k <- kable(sex, caption = "This table shows the distribution of Polar Bears by Sex")
+
+sex_k
+
+```
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+#Descriptive Statistics - Nitrogen and Carbon
+
+nitrogen_isotopes <- round(mean(PolarBearHair$d15N.Air), 2)
+carbon_isotopes <- round(mean(PolarBearHair$d13C.VPDB), 2)
+percent_nitrogen <- round(mean(PolarBearHair$Percent.N), 2)
+percent_carbon <- round(mean(PolarBearHair$Percent.C), 2)
+
+hair_summary <- c(nitrogen_isotopes, carbon_isotopes,percent_nitrogen, percent_carbon)
+
+hair_summary <- data.frame(hair_summary)
+hair_summary <- t(hair_summary)
+
+colnames(hair_summary) <- c("Stable Nitrogen Isotope Ratio, ppm", "Stable Carbon Isotope Ratio, ppm", "Percent Nitrogen, %", "Percent Carbon, %")
+
+rownames(hair_summary) <- c("Mean Value")
+
+hair_summary_k <- kable(hair_summary, caption = "The table below shows four variables - average stable nitrogen and carbon ratios (parts per million) and average percentage of nitrogen and carbon by mass (%).") 
+hair_summary_k
+
+
+```
+

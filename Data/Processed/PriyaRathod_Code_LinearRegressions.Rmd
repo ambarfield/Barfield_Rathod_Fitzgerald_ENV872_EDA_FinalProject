@@ -1,0 +1,105 @@
+---
+title: "Final Project: Descriptive Statistics"
+author: "Priya Rathod"
+date: "Fall 2024"
+output: html_document
+geometry: margin=2.54cm
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+#Loading packages
+
+library(tidyverse) 
+library(lubridate)
+library(here)
+here()
+library(dplyr)
+library(knitr)
+
+#Importing our dataset on polar bears
+PolarBearHair <- read.csv(file = here("Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv"), stringsAsFactors = TRUE)
+
+```
+
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+#Linear Regressions - Correlating Summer Habitats and Nitrogen Isotopes
+
+polarbearhair_hab <- PolarBearHair %>%
+  filter(TypicalSummerHabitat %in% c("ice", "land")) 
+
+polarbearhair_hab <- polarbearhair_hab %>%
+  mutate(Habitat = ifelse(TypicalSummerHabitat == "ice", 1, 0))
+
+polarbearhair_hab_clean <- 
+  select(polarbearhair_hab, TypicalSummerHabitat, Habitat, d15N.Air)
+
+nitrogen_regression <- lm(d15N.Air ~ Habitat, data = polarbearhair_hab_clean)
+summary(nitrogen_regression)
+
+```
+
+Through this linear regression model, we wanted to test whether there is any effect of polar bear typical habitat (on ice vs. land) on the polar bear diet
+(via the ratio of stable nitrogen isotopes). The output of this regression
+suggests that there is a statistically significant relationship between habitat and diet (p-value of 2.04E-07 < 0.01). Given that our dataset had a relatively small sample of habitat data, this analysis should be repeated with a larger dataset.
+
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+# Plot 1 - Correlating Time and Nitrogen Isotopes
+
+plot1 <- ggplot(PolarBearHair, aes(x = Year, y = d15N.Air, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 1 - Stable Nitrogen Isotopes sampled from Polar Bear Hair (2004-2018)",
+x = "Year", y = "Stable Nitrogen Isotopes in parts per million") + geom_point()
+print(plot1)
+
+```
+
+The trend is Figure 1 suggests that the stable nitrogen isotopes across polar
+bears have remained more or less consistent over the ~15 year period.
+
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+# Plot 2 - Correlating Time and Percent Nitrogen
+
+plot2 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.N, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 2 - Percent of Nitrogen in Polar Bear Hair (2004-2018)",
+x = "Year", y = "Percent of Nitrogen by mass measured in the hair") + geom_point()
+print(plot2)
+
+```
+
+The trend is Figure 2 suggests that the percentage of nitrogen found in polar
+bear hair samples has remained more or less consistent over the ~15 year period. 
+Since these nitrogen variables represents the trophic level of polar bear's prey, our results indicate that polar bears have not changed the species they feed on.
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+# Plot 3 - Correlating Time and Carbon Isotopes
+
+plot3 <- ggplot(PolarBearHair, aes(x = Year, y = d13C.VPDB, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 3 - Stable Carbon Isotopes sampled from Polar Bear Hair (1985-2018)",
+x = "Year", y = "Stable Carbon Isotopes in parts per million") + geom_point()
+print(plot3)
+
+```
+
+The trend is Figure 3 suggests that the stable carbon isotopes across polar
+bears have remained more or less consistent over the ~15 year period.
+
+
+```{r,  message = FALSE, echo=FALSE, warning=FALSE}
+
+# Plot 4 - Correlating Time and Percentage Carbon
+
+plot4 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.C, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 4 - Percent of Carbon in Polar Bear Hair (1985-2018)",
+x = "Year", y = "Percent of Carbon by mass measured in the hair") + geom_point()
+print(plot4)
+
+```
+
+The trend is Figure 4 suggests that the percentage of carbon found in polar
+bear hair samples has remained more or less consistent over the ~15 year period. 
+Since these carbon variables represents whether polar bears feed on marine or terrestrial sources, our results indicate that polar bears have not changed their feeding patterns.
