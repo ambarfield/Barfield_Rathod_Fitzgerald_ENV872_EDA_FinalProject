@@ -24,6 +24,7 @@ setwd("~/FinalProject")
 library(here)
 library(mapview)
 library(sf)
+library(knitr)
 library(tidyverse)
 library(lubridate)
 library(Kendall)
@@ -98,7 +99,7 @@ mapView(PolarBearSpatial, zcol = "Year")
 
 
 
-```{r Sampled Polar Bear Dsitribution by Sex, echo=FALSE, warning=FALSE}
+```{r Sampled Polar Bear Distribution by Sex, echo=FALSE, warning=FALSE}
 
 mapView(PolarBearSpatial, zcol = "Sex")
 
@@ -111,23 +112,42 @@ print(plot1)
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 plot2 <- ggplot(PolarBearHair, aes(x = Year, y = d13C.VPDB, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Carbon Isotopes sampled from Polar Bear Hair (1985-2018)",
 x = "Year", y = "Stable Carbon Isotopes in parts per million")
 print(plot2)
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 plot3 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.N, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Nitrogen in Polar Bear Hair (1985-2018)",
 x = "Year", y = "Percent of Nitrogen by mass measured in the hair") 
 print(plot3)
 
 ```
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 plot4 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.C, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Carbon in Polar Bear Hair (1985-2018)",
 x = "Year", y = "Percent of Carbon by mass measured in the hair") 
 print(plot4)
+
+#Descriptive Statistics - Nitrogen and Carbon
+
+nitrogen_isotopes <- round(mean(PolarBearHair$d15N.Air), 2)
+carbon_isotopes <- round(mean(PolarBearHair$d13C.VPDB), 2)
+percent_nitrogen <- round(mean(PolarBearHair$Percent.N), 2)
+percent_carbon <- round(mean(PolarBearHair$Percent.C), 2)
+
+hair_summary <- c(nitrogen_isotopes, carbon_isotopes,percent_nitrogen, percent_carbon)
+
+hair_summary <- data.frame(hair_summary)
+hair_summary <- t(hair_summary)
+
+colnames(hair_summary) <- c("Stable Nitrogen Isotope Ratio", "Stable Carbon Isotope Ratio", "Percent Nitrogen", "Percent Carbon")
+
+rownames(hair_summary) <- c("Mean Value")
+
+hair_summary_k <- kable(hair_summary, caption = "Average Nitrogen and Carbon Concentrations in Polar Bear Hair") 
+hair_summary_k
 
 ```
 
@@ -135,7 +155,7 @@ print(plot4)
 \newpage
 
 # Analysis
-```{r time series analysis, warning=FALSE, echo=FALSE}
+```{r time series analysis, warning=FALSE, echo=FALSE, fig.caption = "Nitrogen and Carbon Stable Isotope Concentrations from 1983-1989"}
 #reading in file
 PolarBear.Hair.Data <- read.csv("./Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv",
 stringsAsFactors = TRUE)
