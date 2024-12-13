@@ -1,9 +1,8 @@
 ---
 title: "Analysis of Polar Bear Diets in the Chukchi & Beaufort Sea"
-
 author: "Andrew Barfield, Kendall Fitzgerald, Priya Rathod"
-
-output: html_document
+output:
+  html_document: default
 ---
 https://github.com/ambarfield/Barfield_Rathod_Fitzgerald_ENV872_EDA_FinalProject.git
 
@@ -58,7 +57,7 @@ This project intends to discover whether the diet of polar bears has changed ove
 
 We chose a USGS dataset that includes carbon and nitrogen isotope concentrations measured in polar bear hair between 1983-2017 in the Beaufort and Chukchi Seas. Polar bears were located by helicopter and immobilized with a dart containing zolazepam-tiletamine, a common anaesthetic used in veterinary medicine. Hair was sampled by pulling 10-20 hairs from one of the upper forearms of polar bears. This dataset was chosen because elements found in hair (Nitrogen, Carbon) indicate the macronutrient composition of diets (protein vs. fat) (Rode et al., 2023).
 
-
+Primary Question: Have polar bear diets change over time in the Beaufort and Chukchi Sea?
 
 
 # Dataset Information
@@ -82,9 +81,45 @@ Percent.N                     | The percent of nitrogen by mass measured in the 
 Percent.C                     | The percent carbon by mass measured in the hair
 
 # Data Wrangling
-Data was wrangled first by taking out two unnecessary columns: “TypicalSummerHabitat” and “SummerHabitatDuringHairGrowth”. These columns only had data for about half of the recorded hair samples and weren’t deemed necessary to undergo further data analysis. After they were taken out, all other samples with “NA” fields were taken out of the cleaned dataset.   
+Data was wrangled for most of the figures by first taking out two unnecessary columns: “TypicalSummerHabitat” and “SummerHabitatDuringHairGrowth”. These columns only had data for about half of the recorded hair samples; however, they were analyzed through a linear regression. All other samples with “NA” fields were taken out of the cleaned dataset before the bulk of the data anlysis. For the time series portion of the analysis, data was wrangled by changing the Capture.Date column from a factor into a date, and then organizing the date column in ascending order. Any year that contained sampling dates that fell outside the months of March, April, and May were then excluded from the analysis. The dataset was also re-organized by dividing the dataset into early years (1983-1989) and late years(2004-2017) due to there being an absence of data from the years of 1990-2003, which needed to be excluded for the time series analysis.  
 
 # Exploratory Analysis 
+```{r echo=FALSE, warning = FALSE}
+#Descriptive Statistics - Sex
+
+sex <- summary(PolarBearHair$Sex)
+sex <-data.frame(Values = sex)
+colnames(sex) <- c("Count, #")
+
+sex_k <- kable(sex, caption = "This table shows the distribution of Polar Bears by Sex")
+
+sex_k
+```
+
+```{r echo=FALSE, warning=FALSE}
+#Descriptive Statistics - Nitrogen and Carbon
+
+nitrogen_isotopes <- round(mean(PolarBearHair$d15N.Air), 2)
+carbon_isotopes <- round(mean(PolarBearHair$d13C.VPDB), 2)
+percent_nitrogen <- round(mean(PolarBearHair$Percent.N), 2)
+percent_carbon <- round(mean(PolarBearHair$Percent.C), 2)
+
+hair_summary <- c(nitrogen_isotopes, carbon_isotopes,percent_nitrogen, percent_carbon)
+
+hair_summary <- data.frame(hair_summary)
+hair_summary <- t(hair_summary)
+
+colnames(hair_summary) <- c("Stable Nitrogen Isotope Ratio, ppm", "Stable Carbon Isotope Ratio, ppm", "Percent Nitrogen, %", "Percent Carbon, %")
+
+rownames(hair_summary) <- c("Mean Value")
+
+hair_summary_k <- kable(hair_summary, caption = "The table below shows four variables - average stable nitrogen and carbon ratios (parts per million) and average percentage of nitrogen and carbon by mass (%).") 
+hair_summary_k
+```
+
+
+
+In order to explore how this dataset was represented, it was important to see how it was distributed spatially throughout the Beaufort and Chukchi Sea. The map below shows the distribution of polar bear samples by the year they were collected. This gives viewers an idea of the relative spatial distribution of the data over time. 
 ```{r Sampled Polar Bear Distribution by Year, echo=FALSE, warning = FALSE}
 #converting data into spatial format
 PolarBearSpatial <- st_as_sf(PolarBearHairCleaned, 
@@ -98,63 +133,96 @@ mapView(PolarBearSpatial, zcol = "Year")
 ```
 
 
-
+The map below shows the relative spatial distribution of all polar bear hair samples separated out by sex.  
 ```{r Sampled Polar Bear Distribution by Sex, echo=FALSE, warning=FALSE}
 
 mapView(PolarBearSpatial, zcol = "Sex")
 
 ```
-
+---
+Analysis 
+Linear Regressions - Correlating Summer Habitats and Nitrogen Isotopes
 ```{r, warning=FALSE, echo=FALSE}
-plot1 <- ggplot(PolarBearHair, aes(x = Year, y = d15N.Air, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Nitrogen Isotopes sampled from Polar Bear Hair (1985-2018)",
-x = "Year", y = "Stable Nitrogen Isotopes in parts per million") 
+#Linear Regressions - Correlating Summer Habitats and Nitrogen Isotopes
+
+polarbearhair_hab <- PolarBearHair %>%
+  filter(TypicalSummerHabitat %in% c("ice", "land")) 
+
+polarbearhair_hab <- polarbearhair_hab %>%
+  mutate(Habitat = ifelse(TypicalSummerHabitat == "ice", 1, 0))
+
+polarbearhair_hab_clean <- 
+  select(polarbearhair_hab, TypicalSummerHabitat, Habitat, d15N.Air)
+
+nitrogen_regression <- lm(d15N.Air ~ Habitat, data = polarbearhair_hab_clean)
+summary(nitrogen_regression)
+
+```
+
+Through this linear regression model, we wanted to test whether there is any effect of polar bear typical habitat (on ice vs. land) on the polar bear diet
+(via the ratio of stable nitrogen isotopes). The output of this regression
+suggests that there is a statistically significant relationship between habitat and diet (p-value of 2.04E-07 < 0.01). Given that our dataset had a relatively small sample of habitat data, this analysis should be repeated with a larger dataset.
+
+
+
+```{r, echo=FALSE, warning=FALSE}
+# Plot 1 - Correlating Time and Nitrogen Isotopes
+
+plot1 <- ggplot(PolarBearHair, aes(x = Year, y = d15N.Air, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 1 - Stable Nitrogen Isotopes sampled from Polar Bear Hair (2004-2018)",
+x = "Year", y = "Stable Nitrogen Isotopes in parts per million") + geom_point()
 print(plot1)
-
 ```
 
+Figure 1. The trend in Figure 1 suggests that the stable nitrogen isotopes across polar
+bears have remained more or less consistent over the ~15 year period.
+
+
 ```{r, echo=FALSE, warning=FALSE}
-plot2 <- ggplot(PolarBearHair, aes(x = Year, y = d13C.VPDB, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Carbon Isotopes sampled from Polar Bear Hair (1985-2018)",
-x = "Year", y = "Stable Carbon Isotopes in parts per million")
+# Plot 2 - Correlating Time and Percent Nitrogen
+
+plot2 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.N, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 2 - Percent of Nitrogen in Polar Bear Hair (2004-2018)",
+x = "Year", y = "Percent of Nitrogen by mass measured in the hair") + geom_point()
 print(plot2)
+
 ```
 
+Figure 2. The trend in Figure 2 suggests that the percentage of nitrogen found in polar
+bear hair samples has remained more or less consistent over the ~15 year period. 
+Since these nitrogen variables represents the trophic level of polar bear's prey, our results indicate that polar bears have not changed the species they feed on.
+
+
 ```{r, echo=FALSE, warning=FALSE}
-plot3 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.N, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Nitrogen in Polar Bear Hair (1985-2018)",
-x = "Year", y = "Percent of Nitrogen by mass measured in the hair") 
+# Plot 3 - Correlating Time and Carbon Isotopes
+
+plot3 <- ggplot(PolarBearHair, aes(x = Year, y = d13C.VPDB, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 3 - Stable Carbon Isotopes sampled from Polar Bear Hair (2004-2018)",
+x = "Year", y = "Stable Carbon Isotopes in parts per million") + geom_point()
 print(plot3)
 
 ```
 
+Figure 3. The trend is Figure 3 suggests that the stable carbon isotopes across polar
+bears have remained more or less consistent over the ~15 year period.
+
 ```{r, echo=FALSE, warning=FALSE}
-plot4 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.C, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Carbon in Polar Bear Hair (1985-2018)",
-x = "Year", y = "Percent of Carbon by mass measured in the hair") 
+# Plot 4 - Correlating Time and Percentage Carbon
+
+plot4 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.C, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(2004, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Figure 4 - Percent of Carbon in Polar Bear Hair (2004-2018)",
+x = "Year", y = "Percent of Carbon by mass measured in the hair") + geom_point()
 print(plot4)
+```
 
-#Descriptive Statistics - Nitrogen and Carbon
+Figure 4. The trend is Figure 4 suggests that the percentage of carbon found in polar
+bear hair samples has remained more or less consistent over the ~15 year period. 
+Since these carbon variables represents whether polar bears feed on marine or terrestrial sources, our results indicate that polar bears have not changed their feeding patterns.
 
-nitrogen_isotopes <- round(mean(PolarBearHair$d15N.Air), 2)
-carbon_isotopes <- round(mean(PolarBearHair$d13C.VPDB), 2)
-percent_nitrogen <- round(mean(PolarBearHair$Percent.N), 2)
-percent_carbon <- round(mean(PolarBearHair$Percent.C), 2)
-
-hair_summary <- c(nitrogen_isotopes, carbon_isotopes,percent_nitrogen, percent_carbon)
-
-hair_summary <- data.frame(hair_summary)
-hair_summary <- t(hair_summary)
-
-colnames(hair_summary) <- c("Stable Nitrogen Isotope Ratio", "Stable Carbon Isotope Ratio", "Percent Nitrogen", "Percent Carbon")
-
-rownames(hair_summary) <- c("Mean Value")
-
-hair_summary_k <- kable(hair_summary, caption = "Average Nitrogen and Carbon Concentrations in Polar Bear Hair") 
-hair_summary_k
+```{r echo=FALSE, warning=FALSE}
 
 ```
 
 
 \newpage
 
-# Analysis
+# Time Series Analysis
 ```{r time series analysis, warning=FALSE, echo=FALSE, fig.caption = "Nitrogen and Carbon Stable Isotope Concentrations from 1983-1989"}
 #reading in file
 PolarBear.Hair.Data <- read.csv("./Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv",
@@ -193,8 +261,10 @@ PolarBear.Late.SortedMonths <- PolarBear.Late %>%
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
 ```
+
 Figure 5. The graph above depicts the nitrogen and carbon stable isotope trends from polar bear hair samples collected in the Beaufort and Chukchi Seas between 1983 - 1989.
-```{r}
+
+```{r echo, echo=FALSE, warning=FALSE}
 #Create a time series object for late polar bear carbon and nitrogen dataframe
 PolarBearLate.Carbon.ts <- ts(PolarBear.Late.SortedMonths$d13C.VPDB, start = c(2004,4), frequency = 35)
 PolarBearLate.Nitrogen.ts <- ts(PolarBear.Late.SortedMonths$d15N.Air, start = c(2004,4), frequency = 35)
@@ -224,15 +294,21 @@ PolarBearLate.Nitrogen.Components <- mutate(PolarBearLate.Nitrogen.Components,
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
 ```
+
 Figure 6. The graph above depicts the nitrogen and carbon stable isotope trends from polar bear hair samples collected in the Beaufort and Chukchi Seas between 2004-2017.
+
 ```{r warning=FALSE, echo=FALSE}
 plot(PolarBearLate.Carbon.Decomposed)
 ```
+
 Figure 7. The graph above depicts the decomposition time series for carbon stable isotope concentrations collected from polar bears between 2004-2017 in the Beafort and Chukchi Seas.
+
 ```{r warning=FALSE, echo=FALSE}
 plot(PolarBearLate.Nitrogen.Decomposed)
 ```
+
 Figure 8. The graph above depicts the decomposition time series for nitrogen stable isotope concentrations collected from polar bears between 2004-2017 in the Beafort and Chukchi Seas.
+
 ```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Carbon.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
@@ -241,7 +317,9 @@ ggplot(PolarBearLate.Carbon.Components) +
   ggtitle("Trend Data for Carbon Isotope Concentrations from 2004-2017") +
   ylab("Stable Isotope Ratios (ppt)")
 ```
-9. The graph above depicts the trend data for stable carbon isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
+
+Figure 9. The graph above depicts the trend data for stable carbon isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
+
 ```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Nitrogen.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
@@ -250,7 +328,9 @@ ggplot(PolarBearLate.Nitrogen.Components) +
   ggtitle("Trend Data for Nitrogen Isotope Concentrations from 2004-2017") +
   ylab("Stable Isotope Ratios (ppt)")
 ```
-10. The graph above depicts the trend data for stable nitrogen isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
+
+Figure 10. The graph above depicts the trend data for stable nitrogen isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
+
 ```{r Man-Kendall Trend Test}
 #Remove seasonality from data
 PolarBear.Late.Nitrogen.NoSeasonality <- PolarBearLate.Nitrogen.ts - PolarBearLate.Nitrogen.Decomposed$time.series[, "seasonal"]
@@ -268,11 +348,14 @@ summary(PolarBear.Late.Carbon.Trend)
 ```
 
 
-
 \newpage
 
 # Summary and Conclusions
+Our results indicate that polar bear diets have largely not changed during the time period (2004-2017). We did find that there is a statistically significant relationships between the stable nitrogen isotopes (which indicate the trophic level of the prey that polar bears feed on) and typical polar bear habitats (on ice vs. land). This is likely because polar bears that spend more time on ice feed on seals (higher trophic level). In compared to polar bears that spend more time on land feed on smaller mammals like rodents or ox (lower trophic level). However, it is important to note that the sample size for the linear regression was smaller than the rest of the dataset (N= 106 vs. N=640). To confirm if this relationship be extended to a broader population, this analysis should be repeated with a larger sample size.
 
+The results of the performed Man-Kendall trend tests reveal no significant trends in both carbon and nitrogen isotope concentrations collected from the polar bear hair samples between 2004-2017. The nitrogen and phosphorous concentrations had tau values of -0.0462 and 0.0328, respectively, but both p-values were greater than 0.05, indicating no statistically significant trends.
+
+As a next step, this data can be connected to datasets on prey sample (also collected by USGS) to identify what polar bears feed on specifically. In addition, data on polar bear weights can also be collected over time as this would indicate if polar bears are fasting for longer periods every year.
 
 \newpage
 
