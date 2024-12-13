@@ -104,7 +104,7 @@ mapView(PolarBearSpatial, zcol = "Sex")
 
 ```
 
-```{r, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE}
 plot1 <- ggplot(PolarBearHair, aes(x = Year, y = d15N.Air, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Nitrogen Isotopes sampled from Polar Bear Hair (1985-2018)",
 x = "Year", y = "Stable Nitrogen Isotopes in parts per million") 
 print(plot1)
@@ -173,13 +173,6 @@ PolarBear.Late.SortedMonths <- PolarBear.Late %>%
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
   
-#Initial late year trends (including late-month samples)
-  ggplot(PolarBear.Late) +
-  geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
-  geom_line(aes(x=Capture.Date, y=d13C.VPDB, color = "Carbon")) +
-    ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 2004-2017") +
-    ylab("Stable Isotope Ratios (ppt)") +
-    xlab("Date")
   
 #Create a time series object for late polar bear carbon and nitrogen dataframe
 PolarBearLate.Carbon.ts <- ts(PolarBear.Late.SortedMonths$d13C.VPDB, start = c(2004,4), frequency = 35)
@@ -189,9 +182,7 @@ PolarBearLate.Nitrogen.ts <- ts(PolarBear.Late.SortedMonths$d15N.Air, start = c(
 PolarBearLate.Carbon.Decomposed <- stl(PolarBearLate.Carbon.ts, s.window = "periodic")
 PolarBearLate.Nitrogen.Decomposed <- stl(PolarBearLate.Nitrogen.ts, s.window = "periodic")
 
-#visualize late decomposition series
-plot(PolarBearLate.Carbon.Decomposed)
-plot(PolarBearLate.Nitrogen.Decomposed)
+
 
 #Extract components and turn into dataframes
 PolarBearLate.Carbon.Components <- as.data.frame(PolarBearLate.Carbon.Decomposed$time.series)
@@ -203,14 +194,38 @@ PolarBearLate.Nitrogen.Components <- as.data.frame(PolarBearLate.Nitrogen.Decomp
 PolarBearLate.Nitrogen.Components <- mutate(PolarBearLate.Nitrogen.Components,
                                             Observed = PolarBear.Late.SortedMonths$d15N.Air,
                                             Date = PolarBear.Late.SortedMonths$Capture.Date)
-#Visualize how trends map onto the data
+
+
+```
+
+```{r warning=FALSE, echo=FALSE}
+#Initial late year trends (including late-month samples)
+  ggplot(PolarBear.Late) +
+  geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
+  geom_line(aes(x=Capture.Date, y=d13C.VPDB, color = "Carbon")) +
+    ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 2004-2017") +
+    ylab("Stable Isotope Ratios (ppt)") +
+    xlab("Date")
+```
+
+```{r warning=FALSE, echo=FALSE}
+plot(PolarBearLate.Carbon.Decomposed)
+```
+
+```{r warning=FALSE, echo=FALSE}
+plot(PolarBearLate.Nitrogen.Decomposed)
+```
+
+```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Carbon.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
   geom_line(aes(x=Date, y=trend), color = 'red', size = 1) +
   geom_hline(yintercept = -16.2, lty = 2) +
   ggtitle("Trend Data for Carbon Isotope Concentrations from 2004-2017") +
   ylab("Stable Isotope Ratios (ppt)")
+```
 
+```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Nitrogen.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
   geom_line(aes(x=Date, y=trend), color = 'red', size = 1) +
@@ -232,14 +247,7 @@ PolarBear.Late.Carbon.Trend <- Kendall::MannKendall(PolarBear.Late.Carbon.NoSeas
 #Summarize Trend Tests
 summary(PolarBear.Late.Nitrogen.Trend)
 summary(PolarBear.Late.Carbon.Trend)
-
 ```
-
-
-
-## Question 1: <insert specific question here and add additional subsections for additional questions below, if needed>
-
-## Question 2: 
 
 
 
