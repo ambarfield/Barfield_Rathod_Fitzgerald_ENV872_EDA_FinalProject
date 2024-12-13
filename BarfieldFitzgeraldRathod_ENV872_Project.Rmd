@@ -104,6 +104,32 @@ mapView(PolarBearSpatial, zcol = "Sex")
 
 ```
 
+```{r, echo=FALSE}
+plot1 <- ggplot(PolarBearHair, aes(x = Year, y = d15N.Air, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Nitrogen Isotopes sampled from Polar Bear Hair (1985-2018)",
+x = "Year", y = "Stable Nitrogen Isotopes in parts per million") 
+print(plot1)
+
+```
+
+```{r, echo=FALSE}
+plot2 <- ggplot(PolarBearHair, aes(x = Year, y = d13C.VPDB, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Stable Carbon Isotopes sampled from Polar Bear Hair (1985-2018)",
+x = "Year", y = "Stable Carbon Isotopes in parts per million")
+print(plot2)
+```
+
+```{r, echo=FALSE}
+plot3 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.N, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Nitrogen in Polar Bear Hair (1985-2018)",
+x = "Year", y = "Percent of Nitrogen by mass measured in the hair") 
+print(plot3)
+
+```
+
+```{r, echo=FALSE}
+plot4 <- ggplot(PolarBearHair, aes(x = Year, y = Percent.C, color = Sex)) + geom_smooth(method=lm) + scale_x_continuous(limits = c(1985, 2020), breaks = seq(1985, 2020, by = 5)) + labs(title = "Percent of Carbon in Polar Bear Hair (1985-2018)",
+x = "Year", y = "Percent of Carbon by mass measured in the hair") 
+print(plot4)
+
+```
 
 
 \newpage
