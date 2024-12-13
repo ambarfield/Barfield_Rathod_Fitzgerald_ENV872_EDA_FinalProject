@@ -192,8 +192,9 @@ PolarBear.Late.SortedMonths <- PolarBear.Late %>%
     ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 1983-1989") +
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
-  
-  
+```
+Figure 5. The graph above depicts the nitrogen and carbon stable isotope trends from polar bear hair samples collected in the Beaufort and Chukchi Seas between 1983 - 1989.
+```{r}
 #Create a time series object for late polar bear carbon and nitrogen dataframe
 PolarBearLate.Carbon.ts <- ts(PolarBear.Late.SortedMonths$d13C.VPDB, start = c(2004,4), frequency = 35)
 PolarBearLate.Nitrogen.ts <- ts(PolarBear.Late.SortedMonths$d15N.Air, start = c(2004,4), frequency = 35)
@@ -215,10 +216,6 @@ PolarBearLate.Nitrogen.Components <- mutate(PolarBearLate.Nitrogen.Components,
                                             Observed = PolarBear.Late.SortedMonths$d15N.Air,
                                             Date = PolarBear.Late.SortedMonths$Capture.Date)
 
-
-```
-
-```{r warning=FALSE, echo=FALSE}
 #Initial late year trends (including late-month samples)
   ggplot(PolarBear.Late) +
   geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
@@ -227,15 +224,15 @@ PolarBearLate.Nitrogen.Components <- mutate(PolarBearLate.Nitrogen.Components,
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
 ```
-
+Figure 6. The graph above depicts the nitrogen and carbon stable isotope trends from polar bear hair samples collected in the Beaufort and Chukchi Seas between 2004-2017.
 ```{r warning=FALSE, echo=FALSE}
 plot(PolarBearLate.Carbon.Decomposed)
 ```
-
+Figure 7. The graph above depicts the decomposition time series for carbon stable isotope concentrations collected from polar bears between 2004-2017 in the Beafort and Chukchi Seas.
 ```{r warning=FALSE, echo=FALSE}
 plot(PolarBearLate.Nitrogen.Decomposed)
 ```
-
+Figure 8. The graph above depicts the decomposition time series for nitrogen stable isotope concentrations collected from polar bears between 2004-2017 in the Beafort and Chukchi Seas.
 ```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Carbon.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
@@ -244,7 +241,7 @@ ggplot(PolarBearLate.Carbon.Components) +
   ggtitle("Trend Data for Carbon Isotope Concentrations from 2004-2017") +
   ylab("Stable Isotope Ratios (ppt)")
 ```
-
+9. The graph above depicts the trend data for stable carbon isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
 ```{r warning=FALSE, echo=FALSE}
 ggplot(PolarBearLate.Nitrogen.Components) +
   geom_line(aes(x=Date, y=Observed), size = 0.5) +
@@ -252,10 +249,11 @@ ggplot(PolarBearLate.Nitrogen.Components) +
   geom_hline(yintercept = 21.6, lty=2) +
   ggtitle("Trend Data for Nitrogen Isotope Concentrations from 2004-2017") +
   ylab("Stable Isotope Ratios (ppt)")
-
+```
+10. The graph above depicts the trend data for stable nitrogen isoptope concentrations from polar bear samples collected in the Beafuort and Chukchi Seas from 2004-2017.
+```{r Man-Kendall Trend Test}
 #Remove seasonality from data
 PolarBear.Late.Nitrogen.NoSeasonality <- PolarBearLate.Nitrogen.ts - PolarBearLate.Nitrogen.Decomposed$time.series[, "seasonal"]
-
 PolarBear.Late.Carbon.NoSeasonality <- PolarBearLate.Carbon.ts - 
   PolarBearLate.Carbon.Decomposed$time.series[, "seasonal"]
 
@@ -268,7 +266,6 @@ PolarBear.Late.Carbon.Trend <- Kendall::MannKendall(PolarBear.Late.Carbon.NoSeas
 summary(PolarBear.Late.Nitrogen.Trend)
 summary(PolarBear.Late.Carbon.Trend)
 ```
-
 
 
 
