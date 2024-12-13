@@ -67,7 +67,6 @@ PolarBear.Late.SortedMonths <- PolarBear.Late %>%
   geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
   geom_line(aes(x=Capture.Date, y=d13C.VPDB, color = "Carbon")) +
     ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 1983-1989") +
-    geom_smooth(method = "lm") +
     ylab("Stable Isotope Ratios (ppt)") +
     xlab("Date")
   
