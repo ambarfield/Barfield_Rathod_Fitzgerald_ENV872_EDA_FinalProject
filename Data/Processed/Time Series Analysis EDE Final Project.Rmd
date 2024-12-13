@@ -1,0 +1,145 @@
+---
+title: "EDA Final Course Project Timeseries Analysis"
+author: "Andrew Barfield"
+date: "2024-12-08"
+output: html_document
+---
+
+# File Setup
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(tidyverse)
+library(trend)
+library(zoo)
+library(tseries)
+library(Kendall)
+
+
+here()
+
+
+#reading in file
+PolarBear.Hair.Data <- read.csv("./Data/Raw/polarBear_CNisotopesHair_beaufortChukchi_rode_1983_2017.csv",
+stringsAsFactors = TRUE)
+
+#Setting date column
+PolarBear.Hair.Data$Capture.Date <- as.Date(PolarBear.Hair.Data$Capture.Date,
+                                                   format = "%m/%d/%Y")
+#Organizing data by date
+PolarBear.Hair.Data.Sorted <- PolarBear.Hair.Data[order(as.Date(PolarBear.Hair.Data$Capture.Date,
+                                     format = "%m-%d-%Y")),]
+
+#Checking to see if there are any NAs in nitrogen isotope concentrations
+any(is.na(PolarBear.Hair.Data.Sorted$d15N.Air))
+
+#Checking to see if there are any NAs in carbon isotope concentrations
+any(is.na(PolarBear.Hair.Data.Sorted$d13C.VPDB))
+
+#set theme
+mytheme <- theme_classic() +
+  theme(legend.position = 'bottom',
+        plot.title = element_text(size = 12, color = 'black', hjust = 0.5),
+        axis.text = element_text(color = 'black', size = 8),
+        legend.title = element_blank())
+theme_set(mytheme)
+```
+
+## Initial Analysis Setup and Plots
+
+```{r initial analysis}
+#There is a big gap of data between 1990 and 2003, so we will first start by separating the data into early and late year chunks
+
+PolarBear.Early <- PolarBear.Hair.Data.Sorted %>%
+  filter(Capture.Date < as.Date("2004-04-06"))
+
+PolarBear.Late <- PolarBear.Hair.Data.Sorted %>% 
+  filter(Capture.Date > as.Date("1989-04-10"))
+
+#Removing later sampling date months that are only present for 3 years within the late study
+PolarBear.Late.SortedMonths <- PolarBear.Late %>% 
+  filter(!month(Capture.Date) %in% c(2,8,9,10))
+
+#Initial early year trends
+  ggplot(PolarBear.Early, ) +
+  geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
+  geom_line(aes(x=Capture.Date, y=d13C.VPDB, color = "Carbon")) +
+    ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 1983-1989") +
+    geom_smooth(method = "lm") +
+    ylab("Stable Isotope Ratios (ppt)") +
+    xlab("Date")
+  
+#Initial late year trends (including late-month samples)
+  ggplot(PolarBear.Late) +
+  geom_line(aes(x=Capture.Date, y=d15N.Air, color = "Nitrogen")) +
+  geom_line(aes(x=Capture.Date, y=d13C.VPDB, color = "Carbon")) +
+    ggtitle("Polar Bear Nitrogen and Carbon Stable Isotope Concentrations 2004-2017") +
+    ylab("Stable Isotope Ratios (ppt)") +
+    xlab("Date")
+
+```
+
+## Time Series Analysis
+
+
+
+```{r decomposition analysis}
+#Create a time series object for late polar bear carbon and nitrogen dataframe
+PolarBearLate.Carbon.ts <- ts(PolarBear.Late.SortedMonths$d13C.VPDB, start = c(2004,4), frequency = 35)
+PolarBearLate.Nitrogen.ts <- ts(PolarBear.Late.SortedMonths$d15N.Air, start = c(2004,4), frequency = 35)
+
+#Decompose the late time series
+PolarBearLate.Carbon.Decomposed <- stl(PolarBearLate.Carbon.ts, s.window = "periodic")
+PolarBearLate.Nitrogen.Decomposed <- stl(PolarBearLate.Nitrogen.ts, s.window = "periodic")
+
+#visualize late decomposition series
+plot(PolarBearLate.Carbon.Decomposed)
+plot(PolarBearLate.Nitrogen.Decomposed)
+
+#Extract components and turn into dataframes
+PolarBearLate.Carbon.Components <- as.data.frame(PolarBearLate.Carbon.Decomposed$time.series)
+PolarBearLate.Carbon.Components <- mutate(PolarBearLate.Carbon.Components,
+                                Observed = PolarBear.Late.SortedMonths$d13C.VPDB,
+                                Date = PolarBear.Late.SortedMonths$Capture.Date)
+
+PolarBearLate.Nitrogen.Components <- as.data.frame(PolarBearLate.Nitrogen.Decomposed$time.series)
+PolarBearLate.Nitrogen.Components <- mutate(PolarBearLate.Nitrogen.Components,
+                                            Observed = PolarBear.Late.SortedMonths$d15N.Air,
+                                            Date = PolarBear.Late.SortedMonths$Capture.Date)
+#Visualize how trends map onto the data
+ggplot(PolarBearLate.Carbon.Components) +
+  geom_line(aes(x=Date, y=Observed), size = 0.5) +
+  geom_line(aes(x=Date, y=trend), color = 'red', size = 1) +
+  geom_hline(yintercept = -16.2, lty = 2) +
+  ggtitle("Trend Data for Carbon Isotope Concentrations from 2004-2017") +
+  ylab("Stable Isotope Ratios (ppt)")
+
+ggplot(PolarBearLate.Nitrogen.Components) +
+  geom_line(aes(x=Date, y=Observed), size = 0.5) +
+  geom_line(aes(x=Date, y=trend), color = 'red', size = 1) +
+  geom_hline(yintercept = 21.6, lty=2) +
+  ggtitle("Trend Data for Nitrogen Isotope Concentrations from 2004-2017") +
+  ylab("Stable Isotope Ratios (ppt)")
+
+```
+
+
+```{r trend analysis}
+#Remove seasonality from data
+PolarBear.Late.Nitrogen.NoSeasonality <- PolarBearLate.Nitrogen.ts - PolarBearLate.Nitrogen.Decomposed$time.series[, "seasonal"]
+
+PolarBear.Late.Carbon.NoSeasonality <- PolarBearLate.Carbon.ts - 
+  PolarBearLate.Carbon.Decomposed$time.series[, "seasonal"]
+
+
+#Perform Man-Kendall Trend Test
+PolarBear.Late.Nitrogen.Trend <- Kendall::MannKendall(PolarBear.Late.Nitrogen.NoSeasonality)
+PolarBear.Late.Carbon.Trend <- Kendall::MannKendall(PolarBear.Late.Carbon.NoSeasonality)
+
+#Summarize Trend Tests
+summary(PolarBear.Late.Nitrogen.Trend)
+summary(PolarBear.Late.Carbon.Trend)
+```
+
